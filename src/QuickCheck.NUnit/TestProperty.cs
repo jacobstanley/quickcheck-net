@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using NUnit.Framework;
+using QuickCheck.Internal;
 
 namespace QuickCheck.NUnit
 {
@@ -18,19 +16,10 @@ namespace QuickCheck.NUnit
             m_TestName = ToSentence(method.Name);
         }
 
-        public void Check(object fixture)
+        public Result Check(object fixture)
         {
-            Type[] args = m_Method
-                .GetParameters()
-                .Select(x => x.ParameterType)
-                .ToArray();
-
-            Type actionType = Expression.GetActionType(args);
-            Delegate action = Delegate.CreateDelegate(actionType, fixture, m_Method);
-
-            MethodInfo quickCheck = CheckMethod(actionType);
-            
-            quickCheck.Invoke(null, new object[] { action });
+            ITestable testable = Reflection.Testable(fixture, m_Method);
+            return Quick.Test(testable);
         }
 
         private static string ToSentence(string name)
@@ -121,57 +110,6 @@ namespace QuickCheck.NUnit
             {
                 return null;
             }
-        }
-
-        private static readonly Dictionary<Type, MethodInfo> s_CheckMethods = CreateLookup();
-
-        private static Dictionary<Type, MethodInfo> CreateLookup()
-        {
-            var lookup = new Dictionary<Type, MethodInfo>();
-            var methods = typeof(Quick)
-                .GetMethods()
-                .Where(x => x.Name == "Check");
-
-            foreach (var method in methods)
-            {
-                var ps = method.GetParameters();
-
-                if (ps.Length != 1)
-                {
-                    continue;
-                }
-
-                var type = ps[0].ParameterType;
-
-                if (method.IsGenericMethod)
-                {
-                    lookup.Add(type.GetGenericTypeDefinition(), method);
-                }
-                else
-                {
-                    lookup.Add(type, method);
-                }
-            }
-
-            return lookup;
-        }
-
-        private static MethodInfo CheckMethod(Type arg)
-        {
-            MethodInfo method;
-
-            if (!arg.IsGenericType)
-            {
-                s_CheckMethods.TryGetValue(arg, out method);
-                return method;
-            }
-
-            if (s_CheckMethods.TryGetValue(arg.GetGenericTypeDefinition(), out method))
-            {
-                return method.MakeGenericMethod(arg.GetGenericArguments());
-            }
-
-            throw new NotSupportedException("Could not find Quick.Check(" + arg.Name + ")");
         }
     }
 }

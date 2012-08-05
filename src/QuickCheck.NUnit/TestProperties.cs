@@ -1,8 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
-using NUnit.Framework;
 using System.Reflection;
+using NUnit.Framework;
+using QuickCheck.Internal;
 
 namespace QuickCheck.NUnit
 {
@@ -16,56 +16,25 @@ namespace QuickCheck.NUnit
         {
         }
 
+        protected void IsTrue(bool prop)
+        {
+            Assert.IsTrue(prop);
+        }
+
+        protected void AreEqual(object x, object y)
+        {
+            Assert.AreEqual(Reflection.Data(x), Reflection.Data(y));
+        }
+
+        protected IEnumerable<T> Sort<T>(IEnumerable<T> list)
+        {
+            return list.OrderBy(x => x);
+        }
+
         [TestCaseSource("GetProperties")]
         public void Check(TestProperty property)
         {
-            try
-            {
-                property.Check(this);
-            }
-            catch (TargetInvocationException exception)
-            {
-                Exception e = exception.InnerException;
-
-                while (e is TargetInvocationException)
-                {
-                    e = e.InnerException;
-                }
-
-                PreserveStackTrace(e);
-
-// ReSharper disable PossibleNullReferenceException
-                FieldInfo remoteStackField = typeof(Exception)
-                    .GetField("_remoteStackTraceString", BindingFlags.NonPublic | BindingFlags.Instance);
-                string remoteStack = (string)remoteStackField.GetValue(e);
-                remoteStackField.SetValue(e, remoteStack
-                    .Split('\n')
-                    .Where(x => !x.StartsWith("   at QuickCheck.Quick"))
-                    .Aggregate((ys, y) => ys + "\n" + y));
-
-                try
-                {
-                    throw e;
-                }
-                finally
-                {
-                    typeof(Exception)
-                        .GetField("_stackTrace", BindingFlags.NonPublic | BindingFlags.Instance)
-                        .SetValue(e, null);
-                }
-// ReSharper restore PossibleNullReferenceException
-            }
-        }
-
-        private static void PreserveStackTrace(Exception exception)
-        {
-            var context = new StreamingContext(StreamingContextStates.CrossAppDomain);
-            var manager = new ObjectManager(null, context);
-            var info = new SerializationInfo(exception.GetType(), new FormatterConverter());
-
-            exception.GetObjectData(info, context);
-            manager.RegisterObject(exception, 1, info);
-            manager.DoFixups();
+            property.Check(this).ThrowError();
         }
 
         internal TestProperty[] GetProperties()
@@ -77,8 +46,8 @@ namespace QuickCheck.NUnit
             {
                 var declared = type.GetMethods(
                     BindingFlags.Instance |
-                    BindingFlags.Public |
-                    BindingFlags.DeclaredOnly);
+                        BindingFlags.Public |
+                        BindingFlags.DeclaredOnly);
 
                 methods = methods.Concat(declared);
                 type = type.BaseType;

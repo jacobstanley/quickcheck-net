@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using QuickCheck.NUnit;
 
@@ -6,20 +7,38 @@ namespace QuickCheck.Examples
 {
     public class MathProperties : TestProperties
     {
-        // TODO: Should allow checking bool return values?
-        //public bool multiplication_commutivity(int x, int y)
-        //{
-        //    return x * y == y * x;
-        //}
-
-        public void multiplication_commutivity(int x, int y)
+        // Fails due to integer overflow
+        public void positive_squares(int x)
         {
-            Assert.AreEqual(x * y, y * x);
+            Assert.That(x * x, Is.GreaterThanOrEqualTo(0));
+        }
+
+        // Fails due to integer overflow
+        public void square_is_greater_than_value(int x)
+        {
+            if (x > 1) Assert.That(x * x, Is.GreaterThan(x));
+        }
+
+        public void multiplication_commutes(int x, int y)
+        {
+            AreEqual(x * y, x * y);
         }
 
         public void reverse_reverse_is_identity(int[] xs)
         {
-            CollectionAssert.AreEqual(xs, xs.Reverse().Reverse());
+            AreEqual(xs, xs.Reverse().Reverse());
+        }
+
+        public void union_commutes(HashSet<int> xs, HashSet<int> ys)
+        {
+            // copy xs as UnionWith does a destructive update
+            var xs1 = new HashSet<int>(xs);
+
+            xs.UnionWith(ys);
+            ys.UnionWith(xs1);
+
+            // TODO: Implement type class style data deconstruction
+            AreEqual(Sort(xs), Sort(ys));
         }
     }
 }

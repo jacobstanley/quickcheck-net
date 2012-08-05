@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace QuickCheck.Generators
+namespace QuickCheck.Internal
 {
     public class Int32Generator : IGenerator<Int32>
     {
@@ -53,6 +53,14 @@ namespace QuickCheck.Generators
         public T[] Arbitrary(Generator gen, int size)
         {
             return gen.Arbitrary<IEnumerable<T>>(size).ToArray();
+        }
+    }
+
+    public class HashSetGenerator<T> : IGenerator<HashSet<T>>
+    {
+        public HashSet<T> Arbitrary(Generator gen, int size)
+        {
+            return new HashSet<T>(gen.Arbitrary<IEnumerable<T>>(size));
         }
     }
 }

@@ -41,10 +41,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Generator.cs" />
-    <Compile Include="Generators.cs" />
+    <Compile Include="Internal\Generators.cs" />
     <Compile Include="IGenerator.cs" />
+    <Compile Include="Internal\ReflectionData.cs" />
+    <Compile Include="Internal\ReflectionTestable.cs" />
+    <Compile Include="Internal\Sequence.cs" />
+    <Compile Include="ITestable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quick.cs" />
+    <Compile Include="Internal\Reflection.cs" />
+    <Compile Include="Result.cs" />
+    <Compile Include="TestableAction.cs" />
+    <Compile Include="TestArgs.cs" />
+    <Compile Include="TestResult.cs" />
+    <Compile Include="Internal\ExceptionHacks.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 
 namespace QuickCheck
 {
@@ -87,7 +86,13 @@ namespace QuickCheck
 
         private static IEnumerable<Type> GeneratableTypes(Type type)
         {
-            return type.GetInterfaces()
+            if (type.GetConstructors().All(x => x.GetParameters().Length != 0))
+            {
+                return new Type[0];
+            }
+
+            return type
+                .GetInterfaces()
                 .Where(IsArbitrary)
                 .Select(x => x.GetGenericArguments().First())
                 .ToArray();
@@ -128,110 +133,54 @@ namespace QuickCheck
             return generator;
         }
 
-        private static void Test(TestAction test)
+        public static Result Test(ITestable test)
         {
             const int maxSuccess = 250;
             const int maxSize = 100;
 
-            int seed = 0;
-            int size = 0;
+            int i;
 
-            try
+            for (i = 0; i < maxSuccess; i++)
             {
-                for (int i = 0; i < maxSuccess; i++)
+                int seed = s_RandomSeed.Next();
+                int size = i % maxSize + 1;
+
+                TestResult result = test.RunTest(Generator(seed), size);
+
+                if (result.IsFailure)
                 {
-                    seed = s_RandomSeed.Next();
-                    size = i % maxSize + 1;
-                    test(Generator(seed), size);
+                    return Result.Failure(i + 1, seed, size, result.Args, result.Error);
                 }
+            }
 
-                Console.WriteLine(
-                    "OK, passed {0} tests.", maxSuccess);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine(
-                    "Test failed, use Quick.Check({0}, {1}, {{your function...}}) to reproduce.",
-                    seed, size);
-                throw;
-            }
+            return Result.Success(i + 1);
         }
 
-        private static void Replay(int seed, int size, TestAction test)
+        public static TestResult Replay(int seed, int size, ITestable test)
         {
             Console.WriteLine(
                 "Replaying test with seed: ({0}, {1})", seed, size);
-            test(Generator(seed), size);
+            return test.RunTest(Generator(seed), size);
         }
 
         public static void Check<A>(Action<A> test)
         {
-            Test(Testable(test));
+            Test(new TestableAction<A>(test)).ThrowError();
         }
 
         public static void Check<A, B>(Action<A, B> test)
         {
-            Test(Testable(test));
+            Test(new TestableAction<A, B>(test)).ThrowError();
         }
-
-        //public static void Check<A>(Func<A, bool> test)
-        //{
-        //    Test(Testable(test));
-        //}
-
-        //public static void Check<A, B>(Func<A, B, bool> test)
-        //{
-        //    Test(Testable(test));
-        //}
 
         public static void Check<A>(int seed, int size, Action<A> test)
         {
-            Replay(seed, size, Testable(test));
+            Replay(seed, size, new TestableAction<A>(test)).ThrowError();
         }
 
         public static void Check<A, B>(int seed, int size, Action<A, B> test)
         {
-            Replay(seed, size, Testable(test));
-        }
-
-        //public static void Check<A>(int seed, int size, Func<A, bool> test)
-        //{
-        //    Replay(seed, size, Testable(test));
-        //}
-
-        //public static void Check<A, B>(int seed, int size, Func<A, B, bool> test)
-        //{
-        //    Replay(seed, size, Testable(test));
-        //}
-
-        private delegate void TestAction(Generator gen, int size);
-
-        private static TestAction Testable<A>(Action<A> action)
-        {
-            return (gen, size) => action(
-                gen.Arbitrary<A>(size));
-        }
-
-        private static TestAction Testable<A, B>(Action<A, B> action)
-        {
-            return (gen, size) =>
-            {
-                A x = gen.Arbitrary<A>(size);
-                B y = gen.Arbitrary<B>(size);
-
-                //Verbose
-                //Console.WriteLine(x + ", " + y);
-
-                try
-                {
-                    action(x, y);
-                }
-                catch (Exception exception)
-                {
-                    // TODO: Replace this with a Result return value
-                    throw new TargetInvocationException(exception);
-                }
-            };
+            Replay(seed, size, new TestableAction<A, B>(test)).ThrowError();
         }
     }
 }
