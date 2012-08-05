@@ -1,0 +1,16 @@
+# Vim
+*.swp
+
+# Visual Studio
+_*/
+bin/
+obj/
+*.user
+*.suo
+
+# NuGet
+/src/packages
+
+# NCrunch
+*.ncrunchsolution
+*.ncrunchproject
