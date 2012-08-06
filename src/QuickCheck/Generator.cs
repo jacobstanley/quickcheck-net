@@ -1,14 +1,15 @@
 ﻿using System;
+using QuickCheck.Internal;
 
 namespace QuickCheck
 {
     public class Generator
     {
-        private readonly Random m_Random;
+        private readonly MersenneTwister m_Twister;
 
         public Generator(int seed)
         {
-            m_Random = new Random(seed);
+            m_Twister = new MersenneTwister((uint)seed);
         }
 
         public T Arbitrary<T>(int size)
@@ -16,26 +17,39 @@ namespace QuickCheck
             return Quick.Generator<T>().Arbitrary(this, size);
         }
 
-        public int Int32()
-        {
-            return m_Random.Next();
-        }
-
         public bool Bool()
         {
             return Choose(0, 1) != 0;
         }
 
+        public int Int32()
+        {
+            return (int)UInt32();
+        }
+
         public long Int64()
         {
-            Int64 high = Int32();
-            Int64 low = Int32();
-            return high << 32 | low;
+            return (long)UInt64();
+        }
+
+        public uint UInt32()
+        {
+            return m_Twister.Next();
+        }
+
+        public ulong UInt64()
+        {
+            ulong hi = UInt32();
+            ulong lo = UInt32();
+            return hi << 32 | lo;
         }
 
         public double Double()
         {
-            return m_Random.NextDouble();
+            // 53-bits of precision
+            uint a = UInt32() >> 5;
+            uint b = UInt32() >> 6;
+            return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
         }
 
         public double Double(int size)
@@ -57,7 +71,14 @@ namespace QuickCheck
 
         public int Choose(int min, int max)
         {
-            return m_Random.Next(min, max);
+            if (min == max)
+            {
+                return min;
+            }
+
+            long diff = max - min + 1;
+            long rand = UInt32();
+            return (int)(min + rand % diff);
         }
 
         public long Choose(long min, long max)
