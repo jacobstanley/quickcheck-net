@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using QuickCheck.NUnit;
@@ -21,7 +22,7 @@ namespace QuickCheck.Examples
 
         public void multiplication_commutes(int x, int y)
         {
-            AreEqual(x * y, x * y);
+            AreEqual(x * y, y * x);
         }
 
         public void reverse_reverse_is_identity(int[] xs)
