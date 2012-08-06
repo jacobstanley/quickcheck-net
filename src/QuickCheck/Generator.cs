@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace QuickCheck
 {
@@ -45,42 +43,6 @@ namespace QuickCheck
             return high << 32 | low;
         }
 
-        public long Choose(int size, long min, long max)
-        {
-            if (min > max)
-            {
-                throw new ArgumentException("max must be greater than min");
-            }
-
-            int pmin = Bits(min);
-            int pmax = Bits(max);
-            int p = Math.Max(pmin, Math.Max(pmax, 40));
-            int n = Math.Min(p * size / 100, 62);
-
-            long k = 1L << n;
-            long kmin = Math.Max(min, -k);
-            long kmax = Math.Min(max, k);
-
-            return Choose(kmin, kmax);
-        }
-
-        public int Choose(int min, int max)
-        {
-            return (int)Choose((long)min, max);
-        }
-
-        public long Choose(long min, long max)
-        {
-            if (min == max)
-            {
-                return min;
-            }
-
-            // unsound for numbers over 60-bits
-            long diff = max - min + 1;
-            return min + Int64() % diff;
-        }
-
         public double Double()
         {
             return m_Random.NextDouble();
@@ -103,10 +65,61 @@ namespace QuickCheck
             return Choose(0.0, max * size / 100.0);
         }
 
+        public int Choose(int min, int max)
+        {
+            return m_Random.Next(min, max);
+        }
+
+        public long Choose(long min, long max)
+        {
+            if (min == max)
+            {
+                return min;
+            }
+
+            // unsound for numbers over 60-bits
+            long diff = max - min + 1;
+            return min + Int64() % diff;
+        }
+
         public double Choose(double min, double max)
         {
             double diff = max - min;
             return min + Double() * diff;
+        }
+
+        public int Choose(int size, int min, int max)
+        {
+            if (min > max)
+            {
+                throw new ArgumentException("max must be greater than min");
+            }
+
+            int n = Math.Max(40 * size / 100, 30);
+            int k = 1 << n;
+            int kmin = Math.Max(min, -k);
+            int kmax = Math.Min(max, k);
+
+            return Choose(kmin, kmax);
+        }
+
+        public long Choose(int size, long min, long max)
+        {
+            if (min > max)
+            {
+                throw new ArgumentException("max must be greater than min");
+            }
+
+            int pmin = Bits(min);
+            int pmax = Bits(max);
+            int p = Math.Max(pmin, Math.Max(pmax, 40));
+            int n = Math.Min(p * size / 100, 62);
+
+            long k = 1L << n;
+            long kmin = Math.Max(min, -k);
+            long kmax = Math.Min(max, k);
+
+            return Choose(kmin, kmax);
         }
 
         private static int Bits(long x)
