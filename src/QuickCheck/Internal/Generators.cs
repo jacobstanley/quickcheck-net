@@ -4,6 +4,14 @@ using System.Linq;
 
 namespace QuickCheck.Internal
 {
+    public class UInt32Generator : IGenerator<UInt32>
+    {
+        public uint Arbitrary(Generator gen, int size)
+        {
+            return (uint)gen.Choose(size, UInt32.MinValue, UInt32.MaxValue);
+        }
+    }
+
     public class Int32Generator : IGenerator<Int32>
     {
         public int Arbitrary(Generator gen, int size)
@@ -25,6 +33,14 @@ namespace QuickCheck.Internal
         public double Arbitrary(Generator gen, int size)
         {
             return gen.Double(size);
+        }
+    }
+
+    public class FloatGenerator : IGenerator<Single>
+    {
+        public float Arbitrary(Generator gen, int size)
+        {
+            return (float)gen.Double(size);
         }
     }
 
