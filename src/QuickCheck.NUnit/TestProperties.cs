@@ -39,17 +39,15 @@ namespace QuickCheck.NUnit
 
         internal TestProperty[] GetProperties()
         {
+            const BindingFlags bindingFlags =
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+
             var type = GetType();
             var methods = Enumerable.Empty<MethodInfo>();
 
             while (type != typeof(Property) && type != null)
             {
-                var declared = type.GetMethods(
-                    BindingFlags.Instance |
-                        BindingFlags.Public |
-                        BindingFlags.DeclaredOnly);
-
-                methods = methods.Concat(declared);
+                methods = methods.Concat(type.GetMethods(bindingFlags));
                 type = type.BaseType;
             }
 
