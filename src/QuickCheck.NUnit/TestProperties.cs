@@ -23,7 +23,9 @@ namespace QuickCheck.NUnit
 
         protected void AreEqual(object x, object y)
         {
-            Assert.AreEqual(Reflection.Data(x), Reflection.Data(y));
+            var dx = Reflection.Data(x);
+            var dy = Reflection.Data(y);
+            Assert.AreEqual(dx, dy);
         }
 
         protected IEnumerable<T> Sort<T>(IEnumerable<T> list)

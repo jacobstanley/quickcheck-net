@@ -4,21 +4,11 @@ namespace QuickCheck
 {
     public class Generator
     {
-        private readonly int m_Seed;
         private readonly Random m_Random;
 
         public Generator(int seed)
         {
-            m_Seed = seed;
             m_Random = new Random(seed);
-        }
-
-        public int Seed
-        {
-            get
-            {
-                return m_Seed;
-            }
         }
 
         public T Arbitrary<T>(int size)

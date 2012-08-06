@@ -20,16 +20,6 @@ namespace QuickCheck
             Register(typeof(Generator).Assembly);
         }
 
-        public static Generator Generator()
-        {
-            return Generator(s_RandomSeed.Next());
-        }
-
-        public static Generator Generator(int seed)
-        {
-            return new Generator(seed);
-        }
-
         public static IGenerator<T> Generator<T>()
         {
             object generator;
@@ -145,7 +135,8 @@ namespace QuickCheck
                 int seed = s_RandomSeed.Next();
                 int size = i % maxSize + 1;
 
-                TestResult result = test.RunTest(Generator(seed), size);
+                Generator gen = new Generator(seed);
+                TestResult result = test.RunTest(gen, size);
 
                 if (result.IsFailure)
                 {
@@ -160,7 +151,7 @@ namespace QuickCheck
         {
             Console.WriteLine(
                 "Replaying test with seed: ({0}, {1})", seed, size);
-            return test.RunTest(Generator(seed), size);
+            return test.RunTest(new Generator(seed), size);
         }
 
         public static void Check<A>(Action<A> test)

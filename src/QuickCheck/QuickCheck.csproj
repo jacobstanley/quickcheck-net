@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Generator.cs" />
+    <Compile Include="Internal\Data.cs" />
     <Compile Include="Internal\Generators.cs" />
     <Compile Include="IGenerator.cs" />
     <Compile Include="Internal\ReflectionData.cs" />
