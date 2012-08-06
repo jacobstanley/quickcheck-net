@@ -109,14 +109,21 @@ namespace QuickCheck
             return min + Double() * diff;
         }
 
-        private static int Bits(long n)
+        private static int Bits(long x)
         {
-            if (n == 0)
-            {
-                return 0;
-            }
+            int bits = 0;
+            ulong n = (ulong)(x < 0 ? -x : x);
 
-            return 1 + Bits(n / 2);
+            if (n >> 32 != 0) { bits += 32; n >>= 32; }
+            if (n >> 16 != 0) { bits += 16; n >>= 16; }
+            if (n >>  8 != 0) { bits +=  8; n >>=  8; }
+            if (n >>  4 != 0) { bits +=  4; n >>=  4; }
+            if (n >>  2 != 0) { bits +=  2; n >>=  2; }
+            if (n >>  1 != 0) { bits +=  1;           }
+
+            // only 0 or 1 left, both require at
+            // least 1 bit to be stored
+            return bits + 1;
         }
     }
 }
