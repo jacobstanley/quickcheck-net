@@ -1,4 +1,5 @@
 using System;
+using QuickCheck.Random;
 
 namespace QuickCheck
 {
@@ -11,7 +12,7 @@ namespace QuickCheck
             m_Test = test;
         }
 
-        public TestResult RunTest(Generator gen, int size)
+        public TestResult RunTest(IRandom gen, int size)
         {
             var a = gen.Arbitrary<A>(size);
             var args = new TestArgs(m_Test.Method, a);
@@ -37,7 +38,7 @@ namespace QuickCheck
             m_Test = test;
         }
 
-        public TestResult RunTest(Generator gen, int size)
+        public TestResult RunTest(IRandom gen, int size)
         {
             var a = gen.Arbitrary<A>(size);
             var b = gen.Arbitrary<B>(size);

@@ -42,11 +42,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Generator.cs" />
     <Compile Include="Internal\Data.cs" />
     <Compile Include="Internal\Generators.cs" />
     <Compile Include="IGenerator.cs" />
-    <Compile Include="Internal\MersenneTwister.cs" />
+    <Compile Include="RandomArbitrary.cs" />
+    <Compile Include="Random\IRandom.cs" />
+    <Compile Include="Random\IRandomFactory.cs" />
+    <Compile Include="Random\Implementations\MersenneTwisterFactory.cs" />
+    <Compile Include="Random\Implementations\MersenneTwisterRandom.cs" />
+    <Compile Include="Random\Implementations\MwcFactory.cs" />
+    <Compile Include="Random\Implementations\MwcRandom.cs" />
+    <Compile Include="Random\RandomDistribution.cs" />
     <Compile Include="Internal\ReflectionData.cs" />
     <Compile Include="Internal\ReflectionTestable.cs" />
     <Compile Include="Internal\Sequence.cs" />
@@ -54,6 +60,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quick.cs" />
     <Compile Include="Internal\Reflection.cs" />
+    <Compile Include="Random\Random.cs" />
+    <Compile Include="Random\RandomRange.cs" />
+    <Compile Include="Random\RandomRangeSizeable.cs" />
+    <Compile Include="Random\RandomSizeable.cs" />
+    <Compile Include="Random\Implementations\SystemRandom.cs" />
+    <Compile Include="Random\Implementations\SystemRandomFactory.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="TestableAction.cs" />
     <Compile Include="TestArgs.cs" />

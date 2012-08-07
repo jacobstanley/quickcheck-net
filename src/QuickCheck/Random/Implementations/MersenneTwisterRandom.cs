@@ -45,9 +45,10 @@
 */
 
 // ReSharper disable InconsistentNaming
-namespace QuickCheck.Internal
+
+namespace QuickCheck.Random
 {
-    public class MersenneTwister
+    public class MersenneTwisterRandom : IRandom
     {
         private const int N = 624;
         private const int M = 397;
@@ -58,7 +59,7 @@ namespace QuickCheck.Internal
         private readonly uint[] mt = new uint[N];
         private uint mti;
 
-        public MersenneTwister(uint seed)
+        public MersenneTwisterRandom(uint seed)
         {
             mt[0] = seed;
             for (mti = 1; mti < N; mti++)
@@ -71,7 +72,7 @@ namespace QuickCheck.Internal
             }
         }
 
-        public unsafe uint Next()
+        public unsafe uint UInt32()
         {
             if (mti == N)
             {

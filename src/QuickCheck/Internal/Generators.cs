@@ -1,36 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QuickCheck.Random;
 
 namespace QuickCheck.Internal
 {
-    public class UInt32Generator : IGenerator<UInt32>
+    public class SByteGenerator : IGenerator<SByte>
     {
-        public uint Arbitrary(Generator gen, int size)
+        public SByte Arbitrary(IRandom gen, int size)
         {
-            return (uint)gen.Choose(size, UInt32.MinValue, UInt32.MaxValue);
+            return gen.SByte(size);
+        }
+    }
+
+    public class Int16Generator : IGenerator<Int16>
+    {
+        public Int16 Arbitrary(IRandom gen, int size)
+        {
+            return gen.Int16(size);
         }
     }
 
     public class Int32Generator : IGenerator<Int32>
     {
-        public int Arbitrary(Generator gen, int size)
+        public Int32 Arbitrary(IRandom gen, int size)
         {
-            return (int)gen.Choose(size, Int32.MinValue, Int32.MaxValue);
+            return gen.Int32(size);
         }
     }
 
     public class Int64Generator : IGenerator<Int64>
     {
-        public long Arbitrary(Generator gen, int size)
+        public Int64 Arbitrary(IRandom gen, int size)
         {
-            return gen.Choose(size, Int64.MinValue, Int64.MaxValue);
+            return gen.Int64(size);
+        }
+    }
+
+    public class ByteGenerator : IGenerator<Byte>
+    {
+        public Byte Arbitrary(IRandom gen, int size)
+        {
+            return gen.Byte(size);
+        }
+    }
+
+    public class UInt16Generator : IGenerator<UInt16>
+    {
+        public UInt16 Arbitrary(IRandom gen, int size)
+        {
+            return gen.UInt16(size);
+        }
+    }
+
+    public class UInt32Generator : IGenerator<UInt32>
+    {
+        public UInt32 Arbitrary(IRandom gen, int size)
+        {
+            return gen.UInt32(size);
+        }
+    }
+
+    public class UInt64Generator : IGenerator<UInt64>
+    {
+        public UInt64 Arbitrary(IRandom gen, int size)
+        {
+            return gen.UInt64(size);
         }
     }
 
     public class DoubleGenerator : IGenerator<Double>
     {
-        public double Arbitrary(Generator gen, int size)
+        public double Arbitrary(IRandom gen, int size)
         {
             return gen.Double(size);
         }
@@ -38,7 +79,7 @@ namespace QuickCheck.Internal
 
     public class FloatGenerator : IGenerator<Single>
     {
-        public float Arbitrary(Generator gen, int size)
+        public float Arbitrary(IRandom gen, int size)
         {
             return (float)gen.Double(size);
         }
@@ -46,9 +87,9 @@ namespace QuickCheck.Internal
 
     public class EnumerableGenerator<T> : IGenerator<IEnumerable<T>>
     {
-        public IEnumerable<T> Arbitrary(Generator gen, int size)
+        public IEnumerable<T> Arbitrary(IRandom gen, int size)
         {
-            int n = gen.Choose(0, size - 1);
+            int n = gen.Range(0, size - 1);
             for (int i = 0; i < n; i++)
             {
                 yield return gen.Arbitrary<T>(size);
@@ -58,7 +99,7 @@ namespace QuickCheck.Internal
 
     public class ListGenerator<T> : IGenerator<List<T>>
     {
-        public List<T> Arbitrary(Generator gen, int size)
+        public List<T> Arbitrary(IRandom gen, int size)
         {
             return gen.Arbitrary<IEnumerable<T>>(size).ToList();
         }
@@ -66,7 +107,7 @@ namespace QuickCheck.Internal
 
     public class ArrayGenerator<T> : IGenerator<T[]>
     {
-        public T[] Arbitrary(Generator gen, int size)
+        public T[] Arbitrary(IRandom gen, int size)
         {
             return gen.Arbitrary<IEnumerable<T>>(size).ToArray();
         }
@@ -74,7 +115,7 @@ namespace QuickCheck.Internal
 
     public class HashSetGenerator<T> : IGenerator<HashSet<T>>
     {
-        public HashSet<T> Arbitrary(Generator gen, int size)
+        public HashSet<T> Arbitrary(IRandom gen, int size)
         {
             return new HashSet<T>(gen.Arbitrary<IEnumerable<T>>(size));
         }

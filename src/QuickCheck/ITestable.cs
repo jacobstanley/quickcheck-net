@@ -1,7 +1,9 @@
-﻿namespace QuickCheck
+﻿using QuickCheck.Random;
+
+namespace QuickCheck
 {
     public interface ITestable
     {
-        TestResult RunTest(Generator gen, int size);
+        TestResult RunTest(IRandom gen, int size);
     }
 }

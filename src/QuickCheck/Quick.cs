@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using QuickCheck.Random;
 
 namespace QuickCheck
 {
     public static class Quick
     {
-        private static readonly Random s_RandomSeed;
+        private static readonly IRandomFactory s_Factory;
         private static readonly Dictionary<Type, object> s_Generators;
         private static readonly Dictionary<Type, Type> s_GeneratorTypes;
 
         static Quick()
         {
-            s_RandomSeed = new Random();
+            s_Factory = new MwcFactory();
             s_Generators = new Dictionary<Type, object>();
             s_GeneratorTypes = new Dictionary<Type, Type>();
 
-            Register(typeof(Generator).Assembly);
+            Register(typeof(Quick).Assembly);
         }
 
         public static IGenerator<T> Generator<T>()
@@ -132,11 +133,11 @@ namespace QuickCheck
 
             for (i = 0; i < maxSuccess; i++)
             {
-                int seed = s_RandomSeed.Next();
+                ulong seed;
+                IRandom random = s_Factory.NewRandom(out seed);
                 int size = i % maxSize + 1;
 
-                Generator gen = new Generator(seed);
-                TestResult result = test.RunTest(gen, size);
+                TestResult result = test.RunTest(random, size);
 
                 if (result.IsFailure)
                 {
@@ -147,11 +148,12 @@ namespace QuickCheck
             return Result.Success(i + 1);
         }
 
-        public static TestResult Replay(int seed, int size, ITestable test)
+        public static TestResult Replay(ulong seed, int size, ITestable test)
         {
             Console.WriteLine(
                 "Replaying test with seed: ({0}, {1})", seed, size);
-            return test.RunTest(new Generator(seed), size);
+            IRandom random = s_Factory.NewRandom(seed);
+            return test.RunTest(random, size);
         }
 
         public static void Check<A>(Action<A> test)
@@ -164,12 +166,12 @@ namespace QuickCheck
             Test(new TestableAction<A, B>(test)).ThrowError();
         }
 
-        public static void Check<A>(int seed, int size, Action<A> test)
+        public static void Check<A>(ulong seed, int size, Action<A> test)
         {
             Replay(seed, size, new TestableAction<A>(test)).ThrowError();
         }
 
-        public static void Check<A, B>(int seed, int size, Action<A, B> test)
+        public static void Check<A, B>(ulong seed, int size, Action<A, B> test)
         {
             Replay(seed, size, new TestableAction<A, B>(test)).ThrowError();
         }

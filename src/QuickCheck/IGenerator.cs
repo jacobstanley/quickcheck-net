@@ -1,7 +1,9 @@
-﻿namespace QuickCheck
+﻿using QuickCheck.Random;
+
+namespace QuickCheck
 {
     public interface IGenerator<out T>
     {
-        T Arbitrary(Generator gen, int size);
+        T Arbitrary(IRandom gen, int size);
     }
 }
