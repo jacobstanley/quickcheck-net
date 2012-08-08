@@ -1,44 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using SimpleInjector;
 using SimpleInjector.Extensions;
 
 namespace QuickCheck.SimpleInjector
 {
-    public sealed class Any
-    {
-    }
-
     public static class RegistrationExtensions
     {
-        public static void AllowToResolveArraysAndLists(this Container container)
-        {
-            container.Register((IEnumerable<Any> xs) => xs.ToArray());
-            container.Register((IEnumerable<Any> xs) => xs.ToList());
-        }
-
-        public static void Register<A, B>(
-            this Container container, Expression<Func<A, B>> mapper)
-        {
-            container.ResolveUnregisteredType += (sender, e) =>
-            {
-                var arguments = typeof(B).GetGenericArguments(e.UnregisteredServiceType);
-
-                if (arguments == null)
-                {
-                    return;
-                }
-
-                Type monoA = typeof(A).BindGenericArguments(arguments);
-
-                Expression source = container.GetRegistration(monoA).BuildExpression();
-                e.Register(Expression.Invoke(mapper.ReduceExtensions(), source));
-            };
-        }
-
         public static void RegisterManySingles(this Container container, Type genericType, Assembly assembly)
         {
             var registrations = assembly

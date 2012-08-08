@@ -35,9 +35,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dynamo.Ioc, Version=3.0.0.1, Culture=neutral, PublicKeyToken=584702d813863cbd, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dynamo.Ioc.3.0.0.1\lib\Dynamo.Ioc.dll</HintPath>
-    </Reference>
     <Reference Include="SimpleInjector">
       <HintPath>..\packages\SimpleInjector.1.5.0.12199\lib\net35\SimpleInjector.dll</HintPath>
     </Reference>
