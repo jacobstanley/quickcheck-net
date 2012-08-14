@@ -1,58 +1,67 @@
 # don't write the command to be executed by 'sh' to stdout
 verbose(false)
 
-MSBUILD    = 'C:/Windows/Microsoft.NET/Framework/v4.0.30319/msbuild.exe'
-MONOLINKER = 'Tools/monolinker/monolinker.exe'
-ILREPACK   = 'Tools/ILRepack/ILRepack.exe'
-
-BUILD_DIR   = 'bin/build'
-LINK_DIR    = 'bin/link'
-MERGE_DIR   = 'bin/merge'
-RELEASE_DIR = 'bin/release'
+MSBUILD    = 'c:/windows/microsoft.net/framework/v4.0.30319/msbuild.exe'
+MONOLINKER = 'tools/monolinker/monolinker.exe'
+ILREPACK   = 'tools/ilrepack/ilrepack.exe'
 
 def tasks
-  task :default => [:build, :link, :merge, :harvest]
+  #task :default => [:copy_libs, :build, :link, :merge, :release]
+  task :default => [:copy_libs, :build, :merge, :release]
 
   task :rebuild => [:clean, :default]
 
-  desc 'Removes all build output'
   task :clean do
-    puts 'Clean: Cleaning up previous build output'
-    stopwatch 'Clean: Clean up' do
-      rm_rf FileList['build/*']
+    puts 'clean: cleaning up previous build output'
+    stopwatch 'clean: clean up' do
+      rm_rf FileList['bin/*']
       rm_rf FileList['src/**/bin']
       rm_rf FileList['src/**/obj']
     end
   end
 
-  task :build do
-    msbuild('Build', 'Release', 'src/QuickCheck.sln')
-  end
-
-  task :link do
-    mkdir_p LINK_DIR
-
-    link "#{LINK_DIR}/QuickCheck", BUILD_DIR, 'QuickCheck'
-  end
-
-  task :merge do
-    mkdir_p MERGE_DIR
-
-    merge "#{MERGE_DIR}/QuickCheck.dll",
-      FileList["#{LINK_DIR}/QuickCheck/*.dll"]
-  end
-
-  task :harvest do
-    mkdir_p RELEASE_DIR
-
-    puts "Harvest: Copying final assemblies to #{RELEASE_DIR}"
-    stopwatch('Harvest: Copying') do
-      cp FileList["#{BUILD_DIR}/QuickCheck.*.dll"], RELEASE_DIR
-      cp FileList["#{MERGE_DIR}/*"], RELEASE_DIR
+  task :copy_libs do
+    puts 'copy: lib -> bin/build'
+    stopwatch 'copy: copying' do
+      mkdir_p 'bin/build'
+      cp_r FileList['lib/*'], 'bin/build'
     end
   end
 
-  def stopwatch(operation='Operation')
+  task :build do
+    msbuild 'release', 'src/QuickCheck.sln'
+  end
+
+  #task :link do
+  #  mkdir_p 'bin/link'
+
+  #  link 'bin/build/QuickCheck', 'bin/link/QuickCheck'
+  #end
+
+  task :merge do
+    mkdir_p 'bin/merge'
+
+    merge 'bin/merge/QuickCheck.dll',
+    #  FileList['bin/link/QuickCheck/*.dll'].
+       ['bin/build/QuickCheck.dll',
+        'bin/build/SimpleInjector.dll',
+        'bin/build/SimpleInjector.Extensions.dll']
+  end
+
+  task :release do
+    mkdir_p 'bin/release'
+
+    files = FileList['bin/build/QuickCheck.*.dll'] +
+            FileList['bin/merge/QuickCheck.dll']
+
+    puts 'release: copying final assemblies to bin/release'
+    stopwatch('release: copying') do
+      puts files
+      cp files, 'bin/release'
+    end
+  end
+
+  def stopwatch(operation='operation')
     startTime = Time.now
     yield
     endTime = Time.now
@@ -61,28 +70,33 @@ def tasks
     printf("#{operation} took %.1fs\n", duration)
   end
 
-  def msbuild(target, config, project)
+  def msbuild(config, project)
     cmd = "#{File.expand_path MSBUILD}"
     cmd << " #{project}"
     cmd << " /nologo"
     cmd << " /maxcpucount"
     cmd << " /verbosity:minimal"
-    cmd << " /property:Configuration=#{config}"
-    cmd << " /target:#{target}"
+    cmd << " /property:configuration=#{config}"
+    cmd << " /target:build"
 
-    puts "MSBuild: #{target} #{config} #{project}"
-    stopwatch("MSBuild: #{target}") { sh cmd }
+    puts "msbuild: building #{project} (#{config} mode)"
+    stopwatch 'msbuild: building' do
+      sh cmd
+    end
   end
 
-  def link(target, input_dir, input_assembly)
+  def link(input, target)
+    input_dir = File.dirname input
+    input_asm = File.basename input
+
     cmd = "#{File.expand_path MONOLINKER}"
-    cmd << " -a #{input_assembly}"
+    cmd << " -a #{input_asm}"
     cmd << " -l none"
     cmd << " -o #{target}"
     cmd << " -d #{input_dir}"
 
-    puts "MonoLinker: #{input_assembly} Optimization"
-    stopwatch('MonoLinker: Optimization') do
+    puts "monolinker: linking #{input}"
+    stopwatch('monolinker: linking') do
       sh cmd
     end
   end
@@ -94,15 +108,9 @@ def tasks
     cmd << " --out:\"#{File.expand_path target}\""
     cmd << ' ' + inputs.map {|x| "\"#{x}\""}.join(' ')
 
-    set_x86 = "#{File.expand_path CORFLAGS}"
-    set_x86 << " /32bit+"
-    set_x86 << " #{target}"
-    set_x86 << " 1>NUL"
-
-    puts "ILRepack: Merge Binaries -> #{target}"
-    stopwatch('ILRepack: Merge') do
+    puts "ilrepack: #{target}"
+    stopwatch('ilrepack: merge') do
       sh cmd
-      sh set_x86
     end
   end
 end
