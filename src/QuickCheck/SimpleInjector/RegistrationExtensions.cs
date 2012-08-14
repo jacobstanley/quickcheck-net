@@ -7,7 +7,7 @@ using SimpleInjector.Extensions;
 
 namespace QuickCheck.SimpleInjector
 {
-    public static class RegistrationExtensions
+    internal static class RegistrationExtensions
     {
         public static void RegisterManySingles(this Container container, Type genericType, Assembly assembly)
         {
