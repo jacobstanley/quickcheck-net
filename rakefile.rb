@@ -1,13 +1,10 @@
 # don't write the command to be executed by 'sh' to stdout
 verbose(false)
 
-MSBUILD    = 'c:/windows/microsoft.net/framework/v4.0.30319/msbuild.exe'
-MONOLINKER = 'tools/monolinker/monolinker.exe'
-ILREPACK   = 'tools/ilrepack/ilrepack.exe'
+MSBUILD = 'c:/windows/microsoft.net/framework/v4.0.30319/msbuild.exe'
 
 def tasks
-  #task :default => [:copy_libs, :build, :link, :merge, :release]
-  task :default => [:copy_libs, :build, :merge, :release]
+  task :default => [:copy_libs, :build, :release]
 
   task :rebuild => [:clean, :default]
 
@@ -32,27 +29,10 @@ def tasks
     msbuild 'release', 'src/QuickCheck.sln'
   end
 
-  #task :link do
-  #  mkdir_p 'bin/link'
-
-  #  link 'bin/build/QuickCheck', 'bin/link/QuickCheck'
-  #end
-
-  task :merge do
-    mkdir_p 'bin/merge'
-
-    merge 'bin/merge/QuickCheck.dll',
-    #  FileList['bin/link/QuickCheck/*.dll'].
-       ['bin/build/QuickCheck.dll',
-        'bin/build/SimpleInjector.dll',
-        'bin/build/SimpleInjector.Extensions.dll']
-  end
-
   task :release do
     mkdir_p 'bin/release'
 
-    files = FileList['bin/build/QuickCheck.*.dll'] +
-            FileList['bin/merge/QuickCheck.dll']
+    files = FileList['bin/build/QuickCheck*.dll']
 
     puts 'release: copying final assemblies to bin/release'
     stopwatch('release: copying') do
@@ -81,35 +61,6 @@ def tasks
 
     puts "msbuild: building #{project} (#{config} mode)"
     stopwatch 'msbuild: building' do
-      sh cmd
-    end
-  end
-
-  def link(input, target)
-    input_dir = File.dirname input
-    input_asm = File.basename input
-
-    cmd = "#{File.expand_path MONOLINKER}"
-    cmd << " -a #{input_asm}"
-    cmd << " -l none"
-    cmd << " -o #{target}"
-    cmd << " -d #{input_dir}"
-
-    puts "monolinker: linking #{input}"
-    stopwatch('monolinker: linking') do
-      sh cmd
-    end
-  end
-
-  def merge(target, inputs)
-    cmd = "#{File.expand_path ILREPACK}"
-    cmd << ' --internalize'
-    cmd << ' --ndebug' # disable pdb files
-    cmd << " --out:\"#{File.expand_path target}\""
-    cmd << ' ' + inputs.map {|x| "\"#{x}\""}.join(' ')
-
-    puts "ilrepack: #{target}"
-    stopwatch('ilrepack: merge') do
       sh cmd
     end
   end

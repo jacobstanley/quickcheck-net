@@ -36,16 +36,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SimpleInjector, Version=1.5.0.12199, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\SimpleInjector.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SimpleInjector.Extensions, Version=1.5.0.12199, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\SimpleInjector.Extensions.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -55,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Internal\GeneratorContainer.cs" />
     <Compile Include="Internal\Data.cs" />
     <Compile Include="Internal\Generators.cs" />
     <Compile Include="IGenerator.cs" />
@@ -80,7 +71,6 @@
     <Compile Include="Random\Implementations\SystemRandom.cs" />
     <Compile Include="Random\Implementations\SystemRandomFactory.cs" />
     <Compile Include="Result.cs" />
-    <Compile Include="SimpleInjector\RegistrationExtensions.cs" />
     <Compile Include="TestableAction.cs" />
     <Compile Include="TestArgs.cs" />
     <Compile Include="TestResult.cs" />

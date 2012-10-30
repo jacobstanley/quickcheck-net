@@ -1,32 +1,36 @@
 ﻿using System;
 using System.Reflection;
+using QuickCheck.Internal;
 using QuickCheck.Random;
-using QuickCheck.SimpleInjector;
-using SimpleInjector;
 
 namespace QuickCheck
 {
     public static class Quick
     {
-        private static readonly IRandomFactory s_Factory;
-        private static readonly Container s_Container;
+        private static readonly IRandomFactory s_RandomFactory;
+        private static readonly GeneratorContainer s_Generators;
 
         static Quick()
         {
-            s_Factory = new MwcFactory();
-            s_Container = new Container();
+            s_RandomFactory = new MwcFactory();
+            s_Generators = new GeneratorContainer();
 
             Register(typeof(Quick).Assembly);
         }
 
         public static IGenerator<T> Generator<T>()
         {
-            return s_Container.GetInstance<IGenerator<T>>();
+            return s_Generators.Instance<T>();
         }
 
         public static void Register(Assembly assembly)
         {
-            s_Container.RegisterManySingles(typeof(IGenerator<>), assembly);
+            s_Generators.Register(assembly);
+        }
+
+        public static void Register(Type type)
+        {
+            s_Generators.Register(type);
         }
 
         public static Result Test(ITestable test)
@@ -39,7 +43,7 @@ namespace QuickCheck
             for (i = 0; i < maxSuccess; i++)
             {
                 ulong seed;
-                IRandom random = s_Factory.NewRandom(out seed);
+                IRandom random = s_RandomFactory.NewRandom(out seed);
                 int size = i % maxSize + 1;
 
                 TestResult result = test.RunTest(random, size);
@@ -57,7 +61,7 @@ namespace QuickCheck
         {
             Console.WriteLine(
                 "Replaying test with seed: ({0}, {1})", seed, size);
-            IRandom random = s_Factory.NewRandom(seed);
+            IRandom random = s_RandomFactory.NewRandom(seed);
             return test.RunTest(random, size);
         }
 
