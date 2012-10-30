@@ -6,6 +6,7 @@ using QuickCheck.Internal;
 
 namespace QuickCheck.NUnit
 {
+    [TestFixture] // TestFixture attribute required for NUnit 2.5
     public abstract class TestProperties : Property
     {
     }
