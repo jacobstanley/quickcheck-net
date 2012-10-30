@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Internal\DataDiff.cs" />
     <Compile Include="Internal\GeneratorContainer.cs" />
     <Compile Include="Internal\Data.cs" />
     <Compile Include="Internal\Generators.cs" />

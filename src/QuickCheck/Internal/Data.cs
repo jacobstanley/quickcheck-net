@@ -18,6 +18,8 @@ namespace QuickCheck.Internal
 
         public abstract StringBuilder AppendTo(StringBuilder sb);
 
+        public abstract DataDiff Diff(Data other);
+
         public static Data Value(object x)
         {
             return new DataValue(x);
@@ -55,6 +57,18 @@ namespace QuickCheck.Internal
                 }
 
                 return sb.Append(m_Primitive);
+            }
+
+            public override DataDiff Diff(Data other)
+            {
+                DataValue value = other as DataValue;
+
+                if (value != null)
+                {
+                    return DataDiff.Value(m_Primitive, value.m_Primitive);
+                }
+
+                return DataDiff.Incompatible(this, other);
             }
 
             public override bool Equals(object obj)
@@ -102,6 +116,18 @@ namespace QuickCheck.Internal
                 }
 
                 return sb.Append("]");
+            }
+
+            public override DataDiff Diff(Data other)
+            {
+                DataList list = other as DataList;
+
+                if (list != null)
+                {
+                    return DataDiff.List(m_Values, list.m_Values);
+                }
+
+                return DataDiff.Incompatible(this, other);
             }
 
             public override bool Equals(object obj)
