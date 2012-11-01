@@ -30,8 +30,7 @@ namespace QuickCheck.Internal
             {
                 s_Testables.TryGetValue(type, out testable);
             }
-
-            if (s_Testables.TryGetValue(type.GetGenericTypeDefinition(), out testable))
+            else if (s_Testables.TryGetValue(type.GetGenericTypeDefinition(), out testable))
             {
                 testable = testable.MakeGenericType(type.GetGenericArguments());
             }

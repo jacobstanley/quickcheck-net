@@ -65,10 +65,31 @@ namespace QuickCheck.Internal
 
                 if (value != null)
                 {
-                    return DataDiff.Value(m_Primitive, value.m_Primitive);
+                    object old = m_Primitive;
+                    object new_ = value.m_Primitive;
+
+                    if (Equals(old, new_))
+                    {
+                        return DataDiff.Empty;
+                    }
+
+                    Type oldType = old.GetType();
+                    Type newType = new_.GetType();
+
+                    if (oldType == newType)
+                    {
+                        if (oldType == typeof(float))
+                        {
+                            return new FloatDiff((float)old, (float)new_);
+                        }
+                        if (oldType == typeof(double))
+                        {
+                            return new DoubleDiff((double)old, (double)new_);
+                        }
+                    }
                 }
 
-                return DataDiff.Incompatible(this, other);
+                return new GeneralDiff(this, other);
             }
 
             public override bool Equals(object obj)
@@ -120,14 +141,12 @@ namespace QuickCheck.Internal
 
             public override DataDiff Diff(Data other)
             {
-                DataList list = other as DataList;
-
-                if (list != null)
+                if (Equals(this, other))
                 {
-                    return DataDiff.List(m_Values, list.m_Values);
+                    return DataDiff.Empty;
                 }
 
-                return DataDiff.Incompatible(this, other);
+                return new GeneralDiff(this, other);
             }
 
             public override bool Equals(object obj)
@@ -161,14 +180,12 @@ namespace QuickCheck.Internal
 
             public override StringBuilder AppendTo(StringBuilder sb)
             {
-                sb.Append(m_Type);
-
                 if (m_Fields.Length == 0)
                 {
                     return sb;
                 }
 
-                sb.Append(" {");
+                sb.Append("{");
 
                 bool comma = false;
                 foreach (var field in m_Fields)
@@ -179,7 +196,7 @@ namespace QuickCheck.Internal
                     }
 
                     sb.Append(field.Key);
-                    sb.Append(" = ");
+                    sb.Append(": ");
 
                     if (field.Value == null)
                     {
@@ -194,6 +211,18 @@ namespace QuickCheck.Internal
                 }
 
                 return sb.Append("}");
+            }
+
+            public override DataDiff Diff(Data other)
+            {
+                DataObject obj = other as DataObject;
+
+                if (obj != null && String.Equals(m_Type, obj.m_Type, StringComparison.Ordinal))
+                {
+                    return new ObjectDiff(m_Fields, obj.m_Fields);
+                }
+
+                return new GeneralDiff(this, other);
             }
 
             public override bool Equals(object obj)

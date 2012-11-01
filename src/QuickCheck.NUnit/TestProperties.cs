@@ -17,16 +17,9 @@ namespace QuickCheck.NUnit
         {
         }
 
-        protected void IsTrue(bool prop)
+        protected DataDiff Diff(object x, object y)
         {
-            Assert.IsTrue(prop);
-        }
-
-        protected void AreEqual(object x, object y)
-        {
-            var dx = Reflection.Data(x);
-            var dy = Reflection.Data(y);
-            Assert.AreEqual(dx, dy);
+            return Reflection.Diff(x, y);
         }
 
         protected IEnumerable<T> Sort<T>(IEnumerable<T> list)

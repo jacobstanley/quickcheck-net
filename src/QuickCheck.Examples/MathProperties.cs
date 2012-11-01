@@ -21,12 +21,12 @@ namespace QuickCheck.Examples
 
         public void multiplication_commutes(int x, int y)
         {
-            AreEqual(x * y, y * x);
+            Diff(x * y, y * x).AssertEmpty();
         }
 
         public void reverse_reverse_is_identity(int[] xs)
         {
-            AreEqual(xs, xs.Reverse().Reverse());
+            Diff(xs, xs.Reverse().Reverse()).AssertEmpty();
         }
 
         public void union_commutes(HashSet<int> xs, HashSet<int> ys)
@@ -38,7 +38,7 @@ namespace QuickCheck.Examples
             ys.UnionWith(xs1);
 
             // TODO: Implement type class style data deconstruction
-            AreEqual(Sort(xs), Sort(ys));
+            Diff(Sort(xs), Sort(ys)).AssertEmpty();
         }
     }
 }

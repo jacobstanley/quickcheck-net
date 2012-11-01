@@ -1,26 +1,57 @@
-﻿using NUnit.Framework;
-using QuickCheck.Internal;
-using QuickCheck.NUnit;
+﻿using QuickCheck.NUnit;
+using QuickCheck.Random;
 
 namespace QuickCheck.Examples
 {
-    [TestFixture]
-    public class DataProperties
+    public class PositionProperties : TestProperties
     {
-        [Test]
-        public void Diff()
+        static PositionProperties()
         {
-            var a = new Position(new Latitude(1, new Variance(2)), new Longitude(3, new Variance(4)));
-            var b = new Position(new Latitude(1, new Variance(0)), new Longitude(5, new Variance(4)));
+            Quick.Register(typeof(PositionProperties).Assembly);
+        }
 
-            var da = Reflection.Data(a);
-            var db = Reflection.Data(b);
+        public void compare_random_positions(Position a)
+        {
+            var b = a;
 
-            var diff = da.Diff(db);
+            if (a.Latitude.Value > 85)
+            {
+                b = new Position(new Latitude(a.Latitude.Value + 1, a.Latitude.Variance), a.Longitude);
+            }
 
-            Assert.IsTrue(diff.IsEmpty, diff.ToString());
+            Diff(a, b).WithEpsilon(0.001).AssertEmpty();
+        }
+    }
 
-            Assert.AreEqual(da, db);
+    public class PosGen : IGenerator<Position>
+    {
+        public Position Arbitrary(IRandom gen, int size)
+        {
+            return new Position(gen.Arbitrary<Latitude>(size), gen.Arbitrary<Longitude>(size));
+        }
+    }
+
+    public class LatGen : IGenerator<Latitude>
+    {
+        public Latitude Arbitrary(IRandom gen, int size)
+        {
+            return new Latitude(gen.Double(size, -90, 90), gen.Arbitrary<Variance>(size));
+        }
+    }
+
+    public class LonGen : IGenerator<Longitude>
+    {
+        public Longitude Arbitrary(IRandom gen, int size)
+        {
+            return new Longitude(gen.Double(size, -180, 180), gen.Arbitrary<Variance>(size));
+        }
+    }
+
+    public class VarGen : IGenerator<Variance>
+    {
+        public Variance Arbitrary(IRandom gen, int size)
+        {
+            return new Variance(gen.Double(size, -10, 10));
         }
     }
 

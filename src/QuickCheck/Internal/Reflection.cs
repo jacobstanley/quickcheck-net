@@ -23,5 +23,12 @@ namespace QuickCheck.Internal
         {
             return ReflectionData.CreateFrom(instance);
         }
+
+        public static DataDiff Diff(object a, object b)
+        {
+            Data da = ReflectionData.CreateFrom(a);
+            Data db = ReflectionData.CreateFrom(b);
+            return da.Diff(db);
+        }
     }
 }

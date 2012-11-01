@@ -3,6 +3,31 @@ using QuickCheck.Random;
 
 namespace QuickCheck
 {
+    public class TestableAction : ITestable
+    {
+        private readonly Action m_Test;
+
+        public TestableAction(Action test)
+        {
+            m_Test = test;
+        }
+
+        public TestResult RunTest(IRandom gen, int size)
+        {
+            var args = new TestArgs(m_Test.Method);
+
+            try
+            {
+                m_Test();
+                return TestResult.Success(args);
+            }
+            catch (Exception exception)
+            {
+                return TestResult.Failure(args, exception);
+            }
+        }
+    }
+
     public class TestableAction<A> : ITestable
     {
         private readonly Action<A> m_Test;
